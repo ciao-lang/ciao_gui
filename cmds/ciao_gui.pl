@@ -42,19 +42,19 @@ parse_args(Args, Rest) :- !, Rest = Args.
 :- doc(section, "Starts the GUI process and begin Ciao server").
 
 main(Args) :-
-	reload_service_registry,
-	parse_args(Args, Rest),
-	%
-	app_url(Rest, URL),
-	Port = 8001,
-	% display(url(URL, Port)), nl,
-	http_bind(Port), % (bind HTTP port) % TODO: need loopback!
-	gui_start(URL, Port),
-	Path = ~site_root_dir, cd(Path), % TODO: not needed?
-	http_loop(ExitCode),
-	gui_stop,
-	% gui_join
-	halt(ExitCode). % TODO: better way?
+    reload_service_registry,
+    parse_args(Args, Rest),
+    %
+    app_url(Rest, URL),
+    Port = 8001,
+    % display(url(URL, Port)), nl,
+    http_bind(Port), % (bind HTTP port) % TODO: need loopback!
+    gui_start(URL, Port),
+    Path = ~site_root_dir, cd(Path), % TODO: not needed?
+    http_loop(ExitCode),
+    gui_stop,
+    % gui_join
+    halt(ExitCode). % TODO: better way?
 
 % ---------------------------------------------------------------------------
 :- doc(section, "GUI process").
@@ -73,52 +73,52 @@ local_server('localhost').
 
 % Add server and port to URL
 full_url(Port, URL0, URL) :-
-	atom_number(Port2, Port),
-	atom_concat(['http://', ~local_server, ':', Port2, URL0], URL).
+    atom_number(Port2, Port),
+    atom_concat(['http://', ~local_server, ':', Port2, URL0], URL).
 
 :- data gui_eng_process/1.
 
 % :- export(gui_start/2).
 gui_start(URL, Port) :-
-	gui_engine(E),
-	URL2 = ~full_url(Port, URL),
-	gui_start_(E, URL2).
+    gui_engine(E),
+    URL2 = ~full_url(Port, URL),
+    gui_start_(E, URL2).
 
 % TODO: Locate binaries for Windows and Linux too
 % TODO: fix fallback mode (no gui_eng_process)
 
 % gui_start_(chrome, URL) :-
-% 	Bin = '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
-% 	process_call(Bin, [~atom_concat('--app=', URL)], []).
+%       Bin = '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome',
+%       process_call(Bin, [~atom_concat('--app=', URL)], []).
 % gui_start_(firefox, URL) :-
-% 	Bin = '/Applications/Firefox.app/Contents/MacOS/firefox',
-% 	process_call(Bin, ['-chrome', URL], []).
+%       Bin = '/Applications/Firefox.app/Contents/MacOS/firefox',
+%       process_call(Bin, ['-chrome', URL], []).
 gui_start_(electron, URL) :-
-	third_party_custom_path(node_modules, NodePath),
-	Bin = ~path_concat(NodePath, 'electron/dist/Electron.app/Contents/MacOS/Electron'),
-	SrcPath = ~bundle_path(ciao_gui, '.'),
-	process_call(Bin, ['src/electron-main.js', URL],
-	             [env(['NODE_PATH'=NodePath]), background(P), cwd(SrcPath)]),
-	set_fact(gui_eng_process(P)).
+    third_party_custom_path(node_modules, NodePath),
+    Bin = ~path_concat(NodePath, 'electron/dist/Electron.app/Contents/MacOS/Electron'),
+    SrcPath = ~bundle_path(ciao_gui, '.'),
+    process_call(Bin, ['src/electron-main.js', URL],
+                 [env(['NODE_PATH'=NodePath]), background(P), cwd(SrcPath)]),
+    set_fact(gui_eng_process(P)).
 
 % :- export(gui_join/0).
 % Wait until GUI process finishes
 gui_join :-
-	( gui_eng_process(P) ->
-	    process_join(P)
-	; true
-	).
+    ( gui_eng_process(P) ->
+        process_join(P)
+    ; true
+    ).
 
 % TODO: try process_join on gui_stop/0?
 
 % :- export(gui_stop/0).
 % Kills the GUI process
 gui_stop :-
-	( gui_eng_process(P) ->
-	    process_kill(P)
-	    % process_join(P)
-	; true
-	).
+    ( gui_eng_process(P) ->
+        process_kill(P)
+        % process_join(P)
+    ; true
+    ).
 
 % ---------------------------------------------------------------------------
 :- doc(section, "Locate/start the URL of the Ciao program").
@@ -127,10 +127,10 @@ gui_stop :-
 
 % Obtain URL from service_registry.pl
 app_url([App], URL) :-
-	bundle_http_entry(_Bundle, App, URL0),
-	!,
-	URL = URL0.
+    bundle_http_entry(_Bundle, App, URL0),
+    !,
+    URL = URL0.
 app_url(Rest, _URL) :- !,
-	format(user_error, "ERROR: not a valid or registered application: ~w~n", Rest),
-	halt(1).
+    format(user_error, "ERROR: not a valid or registered application: ~w~n", Rest),
+    halt(1).
 
